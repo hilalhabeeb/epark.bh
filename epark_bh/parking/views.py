@@ -70,3 +70,60 @@ def user_logout(request):
     auth_logout(request)
     messages.success(request, 'You have been logged out successfully.')
     return redirect('home')
+
+
+from django.shortcuts import render, redirect
+from django.utils import timezone
+from datetime import timedelta
+from .forms import ParkingSessionForm
+from .models import ParkingSession
+
+from django.shortcuts import render, redirect
+from django.utils import timezone
+from datetime import timedelta
+import pytz
+from .forms import ParkingSessionForm
+
+def create_parking_session(request):
+    # Define Bahrain timezone
+    bahrain_tz = pytz.timezone('Asia/Bahrain')
+
+    if request.method == 'POST':
+        form = ParkingSessionForm(request.POST)
+        if form.is_valid():
+            parking_session = form.save(commit=False)
+            parking_session.user = request.user
+            
+            # Get the selected duration
+            duration = request.POST.get('duration')
+
+            # Get the current time in Bahrain timezone
+            now = timezone.now().astimezone(bahrain_tz)
+
+
+            # Set start time
+            parking_session.start_time = now
+
+            # Determine the end time and amount based on duration
+            if duration == '60':  # 1 hour
+                parking_session.amount = 0.200
+                parking_session.end_time = now + timedelta(hours=1)
+            else:  # Default to 30 minutes
+                parking_session.amount = 0.100
+                parking_session.end_time = now + timedelta(minutes=30)
+            
+            parking_session.save()
+            return redirect('payment_page', session_id=parking_session.id)
+    else:
+        form = ParkingSessionForm()
+    
+    # Get the current time in Bahrain timezone
+    now = timezone.now().astimezone(bahrain_tz)
+    end_time = now + timedelta(minutes=30)  # Default to half-hour from now
+
+    return render(request, 'parking/create_parking_session.html', {
+        'form': form,
+        'now': now,
+        'end_time': end_time,
+    })
+

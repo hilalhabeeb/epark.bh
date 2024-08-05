@@ -1,4 +1,4 @@
-<!-- parking/templates/parking/home.html -->
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -108,7 +108,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             color: white;
             position: absolute;
-            top: 30%;
+            top: 35%;
             right: 90px;
             transform: translateY(-50%);
             z-index: 2;
@@ -234,6 +234,10 @@
         footer p {
             margin: 0;
         }
+            .error-message {
+            color: red;
+            font-size: 0.8em;
+        }
     </style>
 </head>
 <body>
@@ -265,10 +269,12 @@
             <div class="field">
                 <i class="fas fa-envelope input-icon"></i>
                 <input autocomplete="off" id="logemail" placeholder="Email Address" class="input-field" name="logemail" type="email" required>
+                <div class="error-message" id="logemailError"></div>
             </div>
             <div class="field">
                 <i class="fas fa-key input-icon"></i>
                 <input autocomplete="off" id="logpassword" placeholder="Password" class="input-field" name="logpassword" type="password" required>
+                <div class="error-message" id="logpasswordError"></div>
             </div>
             <button class="btn" type="submit">Login</button>
             <p class="form-link">Don't have an account yet? <a href="#" id="switchToRegister">Register</a></p>
@@ -278,18 +284,22 @@
             <div class="field">
                 <i class="fas fa-user input-icon"></i>
                 <input autocomplete="off" id="fullname" placeholder="Full Name" class="input-field" name="full_name" type="text" required>
+                <div class="error-message" id="fullnameError"></div>
             </div>
             <div class="field">
                 <i class="fas fa-envelope input-icon"></i>
                 <input autocomplete="off" id="email" placeholder="Email Address" class="input-field" name="email" type="email" required>
+                <div class="error-message" id="emailError"></div>
             </div>
             <div class="field">
                 <i class="fas fa-lock input-icon"></i>
                 <input autocomplete="off" id="password" placeholder="Password" class="input-field" name="password" type="password" required>
+                <div class="error-message" id="passwordError"></div>
             </div>
             <div class="field">
                 <i class="fas fa-lock input-icon"></i>
                 <input autocomplete="off" id="confirm-password" placeholder="Confirm Password" class="input-field" name="confirm_password" type="password" required>
+                <div class="error-message" id="confirmPasswordError"></div>
             </div>
             <button class="btn" type="submit">Register</button>
             <p class="form-link">Already have an account? <a href="#" id="switchToLogin">Login</a></p>
@@ -355,6 +365,81 @@
         });
     });
 </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+
+            // Function to show error message
+            const showError = (input, message) => {
+                const errorElement = document.getElementById(input.id + 'Error');
+                errorElement.innerText = message;
+            };
+
+            // Function to clear error message
+            const clearError = (input) => {
+                const errorElement = document.getElementById(input.id + 'Error');
+                errorElement.innerText = '';
+            };
+
+            // Real-time validation for login form
+            document.getElementById('logemail').addEventListener('input', (e) => {
+                const email = e.target.value;
+                if (!email.includes('@') || !email.includes('.')) {
+                    showError(e.target, 'Please enter a valid email address.');
+                } else {
+                    clearError(e.target);
+                }
+            });
+
+            document.getElementById('logpassword').addEventListener('input', (e) => {
+                const password = e.target.value;
+                if (password.length < 6) {
+                    showError(e.target, 'Password must be at least 6 characters long.');
+                } else {
+                    clearError(e.target);
+                }
+            });
+
+            // Real-time validation for registration form
+            document.getElementById('fullname').addEventListener('input', (e) => {
+                const fullName = e.target.value;
+                if (fullName.length < 3) {
+                    showError(e.target, 'Full name must be at least 3 characters long.');
+                } else {
+                    clearError(e.target);
+                }
+            });
+
+            document.getElementById('email').addEventListener('input', (e) => {
+                const email = e.target.value;
+                if (!email.includes('@') || !email.includes('.')) {
+                    showError(e.target, 'Please enter a valid email address.');
+                } else {
+                    clearError(e.target);
+                }
+            });
+
+            document.getElementById('password').addEventListener('input', (e) => {
+                const password = e.target.value;
+                if (password.length < 6) {
+                    showError(e.target, 'Password must be at least 6 characters long.');
+                } else {
+                    clearError(e.target);
+                }
+            });
+
+            document.getElementById('confirm-password').addEventListener('input', (e) => {
+                const confirmPassword = e.target.value;
+                const password = document.getElementById('password').value;
+                if (confirmPassword !== password) {
+                    showError(e.target, 'Passwords do not match.');
+                } else {
+                    clearError(e.target);
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>

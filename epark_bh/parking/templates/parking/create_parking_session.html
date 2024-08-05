@@ -1,0 +1,257 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start Parking Session</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        /* Existing CSS */
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            background: url("{% static 'img/carparking.jpg' %}") no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: -1;
+        }
+
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px;
+            display: inline-block;
+        }
+        .navbar a:hover {
+            background-color: #575757;
+        }
+        .hero {
+            padding: 80px 20px 20px;
+            text-align: center;
+        }
+        .hero .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            max-width: 600px;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .hero h1 {
+            margin-bottom: 20px;
+            font-size: 2em;
+            color: #333;
+        }
+        .hero form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .hero form p {
+            margin: 0;
+            font-size: 16px;
+            color: #555;
+        }
+        .Btn {
+            width: 130px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            margin-left:130px;
+            justify-content: center;
+            background-color: rgb(15, 15, 15);
+            border: none;
+            color: white;
+            font-weight: 600;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.103);
+            position: relative;
+            overflow: hidden;
+            transition-duration: .3s;
+        }
+
+        .svgIcon {
+            width: 16px;
+        }
+
+        .svgIcon path {
+            fill: white;
+        }
+
+        .Btn::before {
+            width: 130px;
+            height: 130px;
+            position: absolute;
+            content: "";
+            background-color: white;
+            border-radius: 50%;
+            left: -100%;
+            top: 0;
+            transition-duration: .3s;
+            mix-blend-mode: difference;
+        }
+
+        .Btn:hover::before {
+            transition-duration: .3s;
+            transform: translate(100%,-50%);
+            border-radius: 0;
+        }
+
+        .Btn:active {
+            transform: translate(5px,5px);
+            transition-duration: .3s;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #f0f0f0;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .radio-option:hover {
+            background-color: #e0e0e0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .radio-option input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
+    <script>
+        function updateParkingDetails() {
+            const durationElements = document.getElementsByName('duration');
+            let duration;
+            
+            for (const element of durationElements) {
+                if (element.checked) {
+                    duration = element.value;
+                    break;
+                }
+            }
+
+            const startTime = new Date("{{ now|date:'Y-m-d H:i' }}");
+            let endTime;
+            let amount;
+
+            if (duration === '30') {
+                endTime = new Date(startTime.getTime() + 30 * 60000); // 30 minutes
+                amount = "0.100 Fills";
+            } else if (duration === '60') {
+                endTime = new Date(startTime.getTime() + 60 * 60000); // 60 minutes
+                amount = "0.200 Fills";
+            }
+
+            // Adjust endTime to match your local time or intended timezone
+            const offset = startTime.getTimezoneOffset();
+            endTime.setMinutes(endTime.getMinutes() - offset);
+
+            document.getElementById('end-time').innerText = endTime.toISOString().slice(0, 16).replace('T', ' ');
+            document.getElementById('amount').innerText = amount;
+
+            console.log("Start Time:", startTime);
+            console.log("Calculated End Time:", endTime);
+        }
+    </script>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'create_parking_session' %}">Start Parking Session</a>
+        <a href="#">Profile</a>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Start Your Parking Session</h1>
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+
+                    <label><strong>Select Duration:</strong></label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="duration-30" name="duration" value="30" onclick="updateParkingDetails()">
+                            <label for="duration-30">30 minutes (100 Fills)</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="duration-60" name="duration" value="60" onclick="updateParkingDetails()">
+                            <label for="duration-60">1 hour (200 Fills)</label>
+                        </div>
+                    </div>
+
+                    <p><strong>Start Time:</strong> {{ now|date:"Y-m-d H:i" }}</p>
+                    <p><strong>End Time:</strong> <span id="end-time">{{ end_time|date:"Y-m-d H:i" }}</span></p>
+                    <p><strong>Amount:</strong> <span id="amount">0.100 Fills</span></p>
+
+                    <button type="submit" class="Btn">
+                        Pay
+                        <svg class="svgIcon" viewBox="0 0 576 512">
+                            <path d="M512 80c8.8 0 16 7.2 16 16v32H48V96c0-8.8 7.2-16 16-16H512zm16 144V416c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V224H528zM64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H512c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H64zm56 304c-13.3 0-24 10.7-24 24s10.7 24 24 24h48c13.3 0 24-10.7 24-24s-10.7-24-24-24H120zm128 0c-13.3 0-24 10.7-24 24s10.7 24 24 24H360c13.3 0 24-10.7 24-24s-10.7-24-24-24H248z"></path>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 Parking Management System. All rights reserved.</p>
+    </footer>
+</body>
+</html>
